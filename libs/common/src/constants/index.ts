@@ -3,3 +3,28 @@ export enum NodeEnv {
   Production = 'production',
   Test = 'test',
 }
+
+export enum FriendshipType {
+  PRIVATE = 'private',
+  GROUP = 'group',
+}
+
+export enum GroupRole {
+  ADMIN = 'admin',
+  MEMBER = 'member',
+}
+
+export enum MessageType {
+  TEXT = 'text',
+  IMAGE = 'image',
+  VIDEO = 'video',
+  AUDIO = 'audio',
+  DOCUMENT = 'document',
+}
+
+export enum FileType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+  AUDIO = 'audio',
+  DOCUMENT = 'document',
+}

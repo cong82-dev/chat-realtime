@@ -4,23 +4,28 @@ import { ConfigModule } from '@nestjs/config';
 import { validateEnvUtil } from '@app/common/utils/validate.util';
 import { AppSchemaConfig } from './schema/app.schema';
 import { DatabaseSchemaConfig } from './schema/database.schema';
+import { DatabaseModule } from '@app/database';
 import databaseEnvConfig from './database-env.config';
 
-const { NODE_ENV } = process.env;
 const fileConfigs = [appConfig, databaseEnvConfig];
+
+const validatedConfig = (config: Record<string, any>) => {
+  validateEnvUtil(config, AppSchemaConfig);
+  validateEnvUtil(config, DatabaseSchemaConfig);
+  return config;
+};
+
+const envFilePath = ['.env', '.env.development'];
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${NODE_ENV || 'development'}`,
+      envFilePath,
       load: [...fileConfigs],
       cache: true,
-      validate: (config) => {
-        validateEnvUtil(config, AppSchemaConfig);
-        validateEnvUtil(config, DatabaseSchemaConfig);
-        return config;
-      },
+      validate: validatedConfig,
     }),
+    DatabaseModule,
   ],
 })
 export class AppConfigModule {}

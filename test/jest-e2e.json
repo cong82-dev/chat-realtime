@@ -17,6 +17,8 @@
     "@app/config/(.*)": "<rootDir>/../libs/config/src/$1",
     "@app/database": "<rootDir>/../libs/database/src",
     "@app/database/(.*)": "<rootDir>/../libs/database/src/$1",
+    "@app/repositories": "<rootDir>/../libs/repositories/src",
+    "@app/repositories/(.*)": "<rootDir>/../libs/repositories/src/$1",
     "@app/sms": "<rootDir>/../libs/sms/src",
     "@app/sms/(.*)": "<rootDir>/../libs/sms/src/$1"
   }

@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
 
@@ -6,7 +5,6 @@ export function validateEnvUtil<T>(config: Record<string, unknown>, envVariables
   const validatedConfig = plainToInstance(envVariablesClass, config, {
     enableImplicitConversion: true,
   });
-  Logger.log(`checked..........`);
 
   const errors = validateSync(validatedConfig as unknown as object, { skipMissingProperties: false });
 

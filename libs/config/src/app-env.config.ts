@@ -5,15 +5,10 @@ interface IAppConfig {
   port: number;
 }
 
-const DEFAULT_PORT = 3000;
-const DEFAULT_NODE_ENV = 'development';
+const DEFAULT_PORT = 3001;
 
-const { APP_PORT, NODE_ENV } = process.env;
+export default registerAs('app', (): IAppConfig => {
+  const { APP_PORT, APP_NODE_ENV } = process.env;
 
-export default registerAs(
-  'app',
-  (): IAppConfig => ({
-    nodeEnv: NODE_ENV || DEFAULT_NODE_ENV,
-    port: APP_PORT ? parseInt(APP_PORT, 10) : DEFAULT_PORT,
-  }),
-);
+  return { nodeEnv: APP_NODE_ENV!, port: APP_PORT ? parseInt(APP_PORT, 10) : DEFAULT_PORT };
+});

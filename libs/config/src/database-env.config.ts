@@ -5,17 +5,19 @@ interface IDatabaseConfig {
   port: number;
   password: string;
   username: string;
+  database: string;
 }
 
 const DEFAULT_PORT = 5432;
 
-const { DATABASE_HOST, DATABASE_PORT, DATABASE_PASSWORD, DATABASE_USERNAME } = process.env;
-
 export default registerAs('database', (): IDatabaseConfig => {
+  const { DB_HOST, DB_PORT, DB_PASSWORD, DB_USER, DB_NAME } = process.env;
+
   return {
-    host: DATABASE_HOST!,
-    port: DATABASE_PORT ? parseInt(DATABASE_PORT, 10) : DEFAULT_PORT,
-    password: DATABASE_PASSWORD!,
-    username: DATABASE_USERNAME!,
+    host: DB_HOST!,
+    port: DB_PORT ? parseInt(DB_PORT, 10) : DEFAULT_PORT,
+    password: DB_PASSWORD!,
+    username: DB_USER!,
+    database: DB_NAME!,
   };
 });

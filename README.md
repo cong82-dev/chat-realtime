@@ -50,3 +50,7 @@
 
 - **Create/Update Video Call**: Initiate a video call for a conversation, and update its status (ongoing, ended).
 - **Manage Call Participants**: Track users joining, leaving, or missing the call.
+
+### Run database
+
+- run migration: `yarn run migration:generate  ./libs/database/src/migrations/update-id-user`

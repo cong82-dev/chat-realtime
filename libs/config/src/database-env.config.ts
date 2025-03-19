@@ -10,7 +10,7 @@ interface IDatabaseConfig {
 
 const DEFAULT_PORT = 5432;
 
-export default registerAs('database', (): IDatabaseConfig => {
+export default registerAs('db', (): IDatabaseConfig => {
   const { DB_HOST, DB_PORT, DB_PASSWORD, DB_USER, DB_NAME } = process.env;
 
   return {

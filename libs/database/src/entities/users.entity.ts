@@ -1,10 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { FriendshipEntity } from './friendships.entity';
+import { BaseEntity } from './base.entity';
+import { ConversationEntity } from './conversations/conversations.entity';
+import { ConversationMemberEntity } from './conversations/conversation-members.entity';
+import { MessageEntity } from './messages/messages.entity';
 
 @Entity('users')
-export class User extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
-  userId: string;
-
+export class UserEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50, unique: true, nullable: false })
   username: string;
 
@@ -19,4 +21,19 @@ export class User extends BaseEntity {
 
   @Column({ type: 'varchar', length: 20, default: 'active' })
   status: string;
+
+  @OneToMany(() => FriendshipEntity, (friendship) => friendship.initiator)
+  friendRequestsCreators: FriendshipEntity[];
+
+  @OneToMany(() => FriendshipEntity, (friendship) => friendship.recipient)
+  friendRequestsRecipients: FriendshipEntity[];
+
+  @OneToMany(() => ConversationEntity, (conversation) => conversation.CreatedBy)
+  conversations: ConversationEntity[];
+
+  @OneToMany(() => ConversationMemberEntity, (conversationMember) => conversationMember.member)
+  conversationMembers: ConversationMemberEntity[];
+
+  @OneToMany(() => MessageEntity, (message) => message.sender)
+  messages: MessageEntity[];
 }

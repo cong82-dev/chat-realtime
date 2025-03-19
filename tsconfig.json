@@ -17,37 +17,16 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
+
     "paths": {
-      "@app/common": [
-        "libs/common/src"
-      ],
-      "@app/common/*": [
-        "libs/common/src/*"
-      ],
-      "@app/config": [
-        "libs/config/src"
-      ],
-      "@app/config/*": [
-        "libs/config/src/*"
-      ],
-      "@app/database": [
-        "libs/database/src"
-      ],
-      "@app/database/*": [
-        "libs/database/src/*"
-      ],
-      "@app/repositories": [
-        "libs/repositories/src"
-      ],
-      "@app/repositories/*": [
-        "libs/repositories/src/*"
-      ],
-      "@app/sms": [
-        "libs/sms/src"
-      ],
-      "@app/sms/*": [
-        "libs/sms/src/*"
-      ]
+      "@app/common": ["libs/common/src"],
+      "@app/common/*": ["libs/common/src/*"],
+      "@app/config": ["libs/config/src"],
+      "@app/config/*": ["libs/config/src/*"],
+      "@app/database": ["libs/database/src"],
+      "@app/database/*": ["libs/database/src/*"],
+      "@app/sms": ["libs/sms/src"],
+      "@app/sms/*": ["libs/sms/src/*"]
     }
   }
 }

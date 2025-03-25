@@ -28,3 +28,11 @@ export enum FileType {
   AUDIO = 'audio',
   DOCUMENT = 'document',
 }
+
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DELETED = 'deleted',
+  PENDING = 'pending',
+  LOCKED = 'locked',
+}

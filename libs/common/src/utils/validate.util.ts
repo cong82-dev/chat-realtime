@@ -6,7 +6,9 @@ export function validateEnvUtil<T>(config: Record<string, unknown>, envVariables
     enableImplicitConversion: true,
   });
 
-  const errors = validateSync(validatedConfig as unknown as object, { skipMissingProperties: false });
+  const errors = validateSync(validatedConfig as unknown as object, {
+    skipMissingProperties: false,
+  });
 
   if (errors.length > 0) {
     const errorMessages = errors.map((error) => error.toString()).join('\n');

@@ -1,0 +1,3 @@
+libs/database/src/fakers/*
+libs/database/src/migrations/*
+libs/database/src/seeders/*

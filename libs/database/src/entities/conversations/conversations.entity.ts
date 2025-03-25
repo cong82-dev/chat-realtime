@@ -10,7 +10,11 @@ export class ConversationEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50, unique: true, nullable: false })
   name: string;
 
-  @Column({ type: 'enum', enum: FriendshipType, default: FriendshipType.PRIVATE })
+  @Column({
+    type: 'enum',
+    enum: FriendshipType,
+    default: FriendshipType.PRIVATE,
+  })
   type: FriendshipType;
 
   @ManyToOne(() => UserEntity, (user) => user.conversations)

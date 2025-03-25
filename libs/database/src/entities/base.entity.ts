@@ -9,4 +9,9 @@ export abstract class BaseEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  toJSON() {
+    const { createdAt, updatedAt, ...rest } = this;
+    return { ...rest, createdAt, updatedAt };
+  }
 }

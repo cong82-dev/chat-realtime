@@ -26,7 +26,7 @@ export abstract class BaseRepository<T extends HasId> implements IBaseRepository
 
   public async findOneById(id: string): Promise<T | null> {
     const where: FindOptionsWhere<T> = { id } as FindOptionsWhere<T>;
-    return await this.entity.findOneBy(where);
+    return this.entity.findOneBy(where);
   }
 
   public async findByIds(ids: string[]): Promise<T[]> {

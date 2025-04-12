@@ -36,3 +36,22 @@ export enum UserStatus {
   PENDING = 'pending',
   LOCKED = 'locked',
 }
+
+export enum FriendshipStatus {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  REJECTED = 'rejected',
+  BLOCKED = 'blocked',
+  UNFRIENDED = 'unfriended',
+}
+
+export enum OrderBy {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+export const DEFAULT_PAGINATION = {
+  PAGE: 1,
+  TAKE: 10,
+  ORDER_BY: OrderBy.ASC,
+};

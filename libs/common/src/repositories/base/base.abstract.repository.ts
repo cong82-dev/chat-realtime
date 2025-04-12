@@ -1,5 +1,7 @@
 import { DeepPartial, FindManyOptions, FindOneOptions, FindOptionsWhere, In, Repository } from 'typeorm';
 import { IBaseRepository } from './base.repository.interface';
+import { IPagination, IPaginationResult } from '@app/common/interfaces';
+import { getPaginationParams } from '@app/common/helper/pagination.helper';
 
 interface HasId {
   id: string;
@@ -44,6 +46,25 @@ export abstract class BaseRepository<T extends HasId> implements IBaseRepository
 
   public async findAll(options?: FindManyOptions<T>): Promise<T[]> {
     return await this.entity.find(options);
+  }
+
+  public async paginate(payload: IPagination, options?: FindManyOptions<T>): Promise<IPaginationResult<T>> {
+    const { skip, take, page } = getPaginationParams(payload.page, payload.take);
+
+    const [data, total] = await this.entity.findAndCount({
+      skip,
+      take,
+      ...options,
+    });
+
+    return {
+      items: data,
+      meta: {
+        page,
+        total,
+        take,
+      },
+    };
   }
 
   public async remove(data: T): Promise<T> {

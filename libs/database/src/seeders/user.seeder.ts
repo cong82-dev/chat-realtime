@@ -19,10 +19,7 @@ export async function userSeeder(dataSource: DataSource) {
       .orIgnore()
       .execute();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     userIds.push(...result.identifiers.map((user) => user.id));
-
-    console.log(`✅ Seeded users created ${i + BATCH_SIZE} record(s)`);
   }
-
-  return userIds;
 }

@@ -13,11 +13,11 @@ export class JwtAccessTokenStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: `${this.configService.getOrThrow('app.jwtAccessTokenSecret')}`,
+      secretOrKey: `${configService.getOrThrow('app.jwtAccessTokenSecret')}`,
     });
   }
 
   async validate(payload: { userId: string }) {
-    return this.userService.findOneById(payload.userId);
+    return this.userService.findUserById(payload.userId);
   }
 }

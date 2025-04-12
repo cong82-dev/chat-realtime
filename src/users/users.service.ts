@@ -1,3 +1,4 @@
+import { IPagination, IPaginationResult } from '@app/common/interfaces';
 import { UserRepository } from '@app/common/repositories/users.repository';
 import { UserEntity } from '@app/database/entities/users.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -18,7 +19,11 @@ export class UsersService {
     return this.userRepository.findUserByEmail(email);
   }
 
-  async findOneById(id: string) {
+  async findUserById(id: string): Promise<UserEntity | null> {
     return this.userRepository.findOneById(id);
+  }
+
+  async getAllUsers(payload: IPagination): Promise<IPaginationResult<UserEntity>> {
+    return this.userRepository.getAllUsers(payload);
   }
 }

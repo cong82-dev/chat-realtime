@@ -12,5 +12,9 @@ export const ERROR_MESSAGE = Object.freeze({
       code: 'AUTH_EMAIL_ALREADY_EXISTS',
       message: 'Email already exists',
     },
+    USER_NOT_FOUND: {
+      code: 'AUTH_USER_NOT_FOUND',
+      message: 'User not found',
+    },
   },
 });

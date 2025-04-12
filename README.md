@@ -54,3 +54,29 @@
 ### Run database
 
 - run migration: `yarn run migration:generate  ./libs/database/src/migrations/update-id-user`
+
+### api lifecycle
+
+- Middleware: Xử lý request ban đầu (log, xác thực, kiểm tra).
+- Guards: Kiểm tra quyền truy cập (đảm bảo yêu cầu hợp lệ trước khi tiếp tục).
+- Interceptors (Pre-controller): Thực hiện thao tác trước khi dữ liệu đến controller (ví dụ: logging, chuyển đổi dữ liệu).
+- Pipes: Validate và chuyển đổi dữ liệu đầu vào.
+  Controller: Xử lý logic chính của route.
+- Service: Xử lý nghiệp vụ (truy vấn cơ sở dữ liệu, logic tính toán).
+- Interceptors (Post-request): Thực hiện thao tác sau khi controller xử lý (ví dụ: thay đổi response, logging).
+- Exception Filters: Bắt lỗi và trả về lỗi cho client.
+- Server Response: Trả về kết quả cuối cùng cho client.
+
+### Git convention
+
+- `<type>(<scope>): <short description>`
+- Một số type phổ biến:
+
+* feat: Thêm tính năng mới
+* fix: Sửa bug
+* chore: Thay đổi lặt vặt không ảnh hưởng logic (ví dụ: update dependency)
+* refactor: Refactor code, không thay đổi logic
+
+- docs: Thêm hoặc sửa tài liệu
+- test: Thêm hoặc sửa test
+- style: Thay đổi style code (formatting, indent, v.v...)

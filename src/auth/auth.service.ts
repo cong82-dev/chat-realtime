@@ -1,9 +1,8 @@
 import { ERROR_MESSAGE } from '@app/common/constants/error.message';
-import { SUCCESS_MESSAGE } from '@app/common/constants/success.message';
 import { LoginDto } from '@app/common/dto/auth.dto';
-import { ResponseDto } from '@app/common/dto/response.dto';
+import { IToken } from '@app/common/interfaces/token.interface';
+import { IUser } from '@app/common/interfaces/user.interface';
 import { BcryptService } from '@app/common/utils/bcrypt.service';
-import { UserEntity } from '@app/database/entities/users.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -18,7 +17,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<UserEntity> {
+  async validateUser(email: string, password: string): Promise<IUser> {
     const user = await this.usersService.findUserByEmail(email);
 
     if (!user) {
@@ -30,7 +29,7 @@ export class AuthService {
     return user;
   }
 
-  async generateAccessToken(user: UserEntity): Promise<string> {
+  async generateAccessToken(user: IUser): Promise<string> {
     const payload = { sub: user.id, email: user.email };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get('app.jwtAccessTokenSecret'),
@@ -38,7 +37,7 @@ export class AuthService {
     });
   }
 
-  async generateRefreshToken(user: UserEntity): Promise<string> {
+  async generateRefreshToken(user: IUser): Promise<string> {
     const payload = { sub: user.id, email: user.email };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get('app.jwtRefreshTokenSecret'),
@@ -53,24 +52,18 @@ export class AuthService {
     }
   }
 
-  async login(user: UserEntity) {
-    const { accessToken, refreshToken } = await Promise.all([
+  async login(user: IUser): Promise<IToken> {
+    const [accessToken, refreshToken] = await Promise.all([
       this.generateAccessToken(user),
       this.generateRefreshToken(user),
     ]).catch((error: Error) => {
       throw new BadRequestException(error.message.split('\n').pop());
     });
 
-    return {
-      data: {
-        accessToken,
-        refreshToken,
-      },
-      message: 'User logged in successfully',
-    };
+    return { refreshToken, accessToken };
   }
 
-  async register(payload: LoginDto): Promise<ResponseDto> {
+  async register(payload: LoginDto): Promise<Partial<IUser> & IToken> {
     const { email, password } = payload;
 
     const existingUser = await this.usersService.findUserByEmail(email);
@@ -87,20 +80,22 @@ export class AuthService {
     ]);
 
     return {
-      data: {
-        id: newUser.id,
-        email: newUser.email,
-        accessToken,
-        refreshToken,
-      },
-      message: SUCCESS_MESSAGE.AUTH.REGISTER_SUCCESS.message,
+      id: newUser.id,
+      email: newUser.email,
+      accessToken,
+      refreshToken,
     };
   }
-  // async generateTokens(user: UserEntity) {
-  //   const payload = { sub: user.id, username: user.username };
-  //   // return {
-  //   //   access_token: this.jwtService.sign(payload, { expiresIn: '15m' }),
-  //   //   refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
-  //   // };
-  // }
+
+  async getProfile(userId: string): Promise<Partial<IUser>> {
+    const user = await this.usersService.findUserById(userId);
+    if (!user) {
+      throw new BadRequestException(ERROR_MESSAGE.AUTH.USER_NOT_FOUND);
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+    };
+  }
 }

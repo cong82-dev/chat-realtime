@@ -1,5 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { DEFAULT_PAGINATION, OrderBy } from '../constants';
+import { Transform } from 'class-transformer';
 
 export class IDParam {
   @ApiProperty({ example: 1 })
@@ -8,15 +10,25 @@ export class IDParam {
 }
 
 export class PaginationDto {
-  @ApiProperty({ example: 1 })
-  @IsString()
-  readonly page: string;
+  @ApiPropertyOptional({ example: 1 })
+  @Transform(({ value }) => {
+    return value !== undefined ? Number(value) : DEFAULT_PAGINATION.PAGE;
+  })
+  @IsOptional()
+  @IsNumber()
+  readonly page: number;
 
-  @ApiProperty({ example: 10 })
-  @IsString()
-  readonly limit: string;
+  @ApiPropertyOptional({ example: 10 })
+  @Transform(({ value }) => (value !== undefined ? Number(value) : DEFAULT_PAGINATION.TAKE))
+  @IsOptional()
+  @IsNumber()
+  readonly take: number;
 
-  @ApiProperty({ example: 'asc' })
-  @IsString()
-  readonly order: string;
+  @ApiPropertyOptional({ enum: OrderBy, example: OrderBy.ASC })
+  @Transform(({ value }) => {
+    return value !== undefined ? (value as string) : DEFAULT_PAGINATION.ORDER_BY;
+  })
+  @IsEnum(OrderBy)
+  @IsOptional()
+  readonly orderBy: OrderBy;
 }

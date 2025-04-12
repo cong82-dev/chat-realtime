@@ -15,7 +15,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: configService.get<string>('DB_NAME'),
   synchronize: false,
   migrations: ['libs/database/src/migrations/*.ts'],
-  entities: ['libs/database/src/entities/**/*.entity.ts'],
+  entities: ['libs/database/src/entities/**/*.ts'],
   migrationsTableName: 'migrations-history',
 };
 

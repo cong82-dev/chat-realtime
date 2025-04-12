@@ -1,42 +1,31 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
-import { Response as ExpressResponse } from 'express';
-import { getMessage } from '../messages';
-import { map } from 'rxjs';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { getMessage } from '@app/common/messages';
+import { Response } from 'express';
 
-export interface Response {
-  message?: string;
-  data?: unknown;
-  meta?: unknown;
-  error?: unknown;
+export interface ResponseData<T> {
+  statusCode: number;
+  message: string;
+  data: T;
 }
 
 @Injectable()
-export class TransformInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler) {
+export class TransformInterceptor<T = any> implements NestInterceptor<unknown, ResponseData<T>> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<ResponseData<T>> {
     const ctx = context.switchToHttp();
-    const response = ctx.getResponse<ExpressResponse>();
-    const status = response.statusCode;
+    const response = ctx.getResponse<Response>();
 
     return next.handle().pipe(
-      map((data: Response) => {
-        const message = data?.message || getMessage(status);
+      map((data: T) => {
+        const statusCode = response.statusCode || 200;
+        const message = getMessage(statusCode) || 'SUCCESS';
         return {
-          statusCode: status,
+          statusCode,
           message,
-          data: data?.data,
-          meta: data?.meta,
+          data,
         };
       }),
-      // catchError((err: Error & HttpException) => {
-      //   const statusCode = err instanceof HttpException ? err.getStatus() : 500;
-      //   console.log('statusCode', statusCode, err);
-      //   const errorResponse = {
-      //     statusCode: statusCode,
-      //     message: err.message || message,
-      //     error: err.name || 'Error',
-      //   };
-      //   return throwError(() => new HttpException(errorResponse, status));
-      // }),
     );
   }
 }

@@ -24,7 +24,8 @@ const configOrm = TypeOrmModule.forRootAsync({
       MessageEntity,
       MessageAttachmentEntity,
     ],
-    synchronize: true,
+    synchronize: false,
+    logging: ['query', 'error'],
   }),
   inject: [ConfigService],
 });

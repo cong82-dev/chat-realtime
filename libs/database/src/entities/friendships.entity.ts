@@ -1,11 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { UserEntity } from './users.entity';
 import { BaseEntity } from './base.entity';
+import { FriendshipStatus } from '@app/common/constants';
 
 @Entity('friendships')
+@Index('friendship_index', ['initiator', 'recipient'], { unique: true })
 export class FriendshipEntity extends BaseEntity {
-  @Column({ type: 'varchar', length: 20, default: 'pending' })
-  status: string;
+  @Column({ type: 'enum', enum: FriendshipStatus, default: FriendshipStatus.PENDING })
+  status: FriendshipStatus;
 
   @ManyToOne(() => UserEntity, (user) => user.friendRequestsCreators)
   @JoinColumn({ name: 'initiator_id' })

@@ -1,5 +1,7 @@
 import { BadRequestException, HttpStatus, Optional, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
 import { ValidationError } from 'class-validator';
+import { formatErrorPipeUtil } from '../utils/validate.util';
+import { ERROR_TYPES_MESSAGE } from '../constants/message-api';
 
 export class MainPipe extends ValidationPipe {
   constructor(@Optional() options: ValidationPipeOptions = {}) {
@@ -11,33 +13,12 @@ export class MainPipe extends ValidationPipe {
   }
 
   protected exceptionFactory: (errors: ValidationError[]) => BadRequestException = (errors) => {
-    const formattedErrors = this.formatErrors(errors);
+    const formattedErrors = formatErrorPipeUtil(errors);
 
     return new BadRequestException({
       statusCode: HttpStatus.BAD_REQUEST,
-      message: 'Validation failed',
+      message: ERROR_TYPES_MESSAGE.VALIDATE_ERROR,
       errors: formattedErrors,
     });
   };
-
-  private formatErrors(errors: ValidationError[]): any[] {
-    return errors
-      .map((error) => ({
-        field: error.property,
-        message: this.getMessage(error),
-      }))
-      .filter((error) => error.message);
-  }
-
-  private getMessage(error: ValidationError): string {
-    if (error.constraints) {
-      return Object.values(error.constraints)[0];
-    }
-
-    if (error.children && error.children.length) {
-      return error.children.map((child) => this.getMessage(child)).join(', ');
-    }
-
-    return 'Validation failed';
-  }
 }

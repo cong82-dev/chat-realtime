@@ -1,58 +1,51 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { QueryFailedError } from 'typeorm';
-import { NodeEnv } from '../constants';
+import { LoggerService } from '../logger/logger.service';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  constructor(private readonly logger: LoggerService) {}
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
-    let error = exception;
-
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const res = exception.getResponse();
+    const result = (() => {
       if (exception instanceof HttpException) {
-        status = exception.getStatus();
-        const res = exception.getResponse();
-
-        if (typeof res === 'string') {
-          message = res;
-        } else if (this.isErrorResponse(res)) {
-          message = res.message;
+        const status = exception.getStatus();
+        const responseBody = exception.getResponse();
+        if (typeof responseBody === 'string') {
+          return { status, message: responseBody, errors: null };
+        } else if (typeof responseBody === 'object') {
+          const { message, errors } = responseBody as { message?: string; errors?: unknown };
+          return { status, message: message || 'Unknown error', errors: errors || null };
         }
       }
-      error = res;
-    } else if (exception instanceof QueryFailedError) {
-      status = HttpStatus.BAD_REQUEST;
-      message = 'Database query error';
-      const dbError = exception.driverError;
 
-      const isProd = process.env.NODE_ENV === NodeEnv.Production;
-      message = isProd ? 'An unexpected database error occurred.' : 'Database query error';
+      if (exception instanceof QueryFailedError) {
+        return {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Database error',
+          errors: (exception as any).message,
+        };
+      }
 
-      error = isProd
-        ? undefined
-        : {
-            message: dbError?.message || 'Unknown DB error',
-            detail: dbError?.detail,
-            code: dbError?.code,
-          };
-    } else if (exception instanceof Error) {
-      message = exception.message;
-    }
+      return { status: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Internal server error', errors: null };
+    })() as { status: number; message: string; errors: unknown | null };
+    const { status, message, errors } = result;
+
+    this.logger.error(
+      `[${request.method}] [${status}] ${request.url} - ${JSON.stringify(message)}`,
+      exception instanceof Error ? exception.stack : undefined,
+      AllExceptionsFilter.name,
+    );
 
     response.status(status).json({
       statusCode: status,
       message,
-      error,
+      errors,
+      timestamp: new Date().toISOString(),
     });
   }
-  private isErrorResponse = (obj: unknown): obj is { message: string } => {
-    return typeof obj === 'object' && obj !== null && 'message' in obj;
-  };
 }

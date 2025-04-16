@@ -1,5 +1,5 @@
 import { FriendshipStatus } from '@app/common/constants';
-import { FRIENDSHIP_MESSAGES } from '@app/common/constants/friendship';
+import { ERROR_MESSAGE, SUCCESS_MESSAGE } from '@app/common/constants/message-api';
 import { FriendshipResponseDto } from '@app/common/dto/friendship/response.dto';
 import { IPagination } from '@app/common/interfaces';
 import { IFriendship } from '@app/common/interfaces/friendship.interface';
@@ -25,17 +25,17 @@ export class FriendshipsService {
     const existingRequest = await this.friendshipRepository.findFriendshipBetweenUsers(initiatorId, recipientId);
 
     if (existingRequest) {
-      throw new ConflictException(FRIENDSHIP_MESSAGES.FRIEND_REQUEST_EXISTS);
+      throw new ConflictException(ERROR_MESSAGE.FRIENDSHIPS.FRIEND_REQUEST_ALREADY_ACCEPTED);
     }
 
     const [initiator, recipient] = await this.findUsersByIds(initiatorId, recipientId);
     if (!recipient || !initiator) {
-      throw new BadRequestException(FRIENDSHIP_MESSAGES.USERS_NOT_FOUND);
+      throw new BadRequestException(ERROR_MESSAGE.FRIENDSHIPS.FRIEND_REQUEST_NOT_FOUND);
     }
 
     await this.createFriendRequest(initiator, recipient);
     return {
-      message: FRIENDSHIP_MESSAGES.FRIEND_REQUEST_SENT,
+      message: SUCCESS_MESSAGE.FRIENDSHIPS.FRIEND_REQUEST_SENT,
     };
   }
 
@@ -43,11 +43,11 @@ export class FriendshipsService {
     const friendship = await this.friendshipRepository.findFriendshipBetweenUsers(recipient, payload.initiatorId);
 
     if (!friendship) {
-      throw new BadRequestException(FRIENDSHIP_MESSAGES.FRIEND_REQUEST_NOT_FOUND);
+      throw new BadRequestException(ERROR_MESSAGE.FRIENDSHIPS.FRIEND_REQUEST_NOT_FOUND);
     }
 
     if (friendship.status !== FriendshipStatus.PENDING) {
-      throw new ConflictException(FRIENDSHIP_MESSAGES.FRIEND_REQUEST_ALREADY_ACCEPTED);
+      throw new ConflictException(ERROR_MESSAGE.FRIENDSHIPS.FRIEND_REQUEST_ALREADY_ACCEPTED);
     }
 
     const updatedFriendshipStatus = this.getUpdatedStatus(payload.action);
@@ -57,7 +57,7 @@ export class FriendshipsService {
     });
 
     return {
-      message: FRIENDSHIP_MESSAGES.FRIEND_REQUEST_UPDATED,
+      message: SUCCESS_MESSAGE.FRIENDSHIPS.FRIEND_REQUEST_RESPONSE,
     };
   }
 
@@ -68,7 +68,7 @@ export class FriendshipsService {
       case FriendshipStatus.REJECTED:
         return FriendshipStatus.REJECTED;
       default:
-        throw new BadRequestException(FRIENDSHIP_MESSAGES.INVALID_ACTION);
+        throw new BadRequestException(ERROR_MESSAGE.FRIENDSHIPS.INVALID_ACTION);
     }
   }
 

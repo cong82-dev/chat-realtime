@@ -26,4 +26,10 @@ export class UsersService {
   async getAllUsers(payload: IPagination): Promise<IPaginationResult<UserEntity>> {
     return this.userRepository.getAllUsers(payload);
   }
+
+  async updateUserRefreshToken(userId: string, hashedRt: string): Promise<void> {
+    return this.userRepository.updateUserRefreshToken(userId, hashedRt).catch((error: Error) => {
+      throw new BadRequestException(error.message.split('\n').pop());
+    });
+  }
 }

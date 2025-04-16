@@ -1,0 +1,10 @@
+@baseUrl = http://localhost:3000/api/v1
+
+### Call API refresh-token
+POST {{baseUrl}}/auth/refresh-token
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjkyYTJkOC04M2E0LTQ4OTUtODhhZC1lNjZhOWUyMTE4YjQiLCJlbWFpbCI6ImRldkB5b3BtYWlsLmNvbSIsImlhdCI6MTc0NDY5OTQ4NiwiZXhwIjoxNzQ1MzA0Mjg2fQ.Hc9biUAEvcarVLqtJ5TKkM0p5sORbUih1ap6Z1lbCpE
+
+### Get all users
+GET {{baseUrl}}/users
+Content-Type: application/json

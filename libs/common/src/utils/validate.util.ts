@@ -1,5 +1,5 @@
 import { ClassConstructor, plainToInstance } from 'class-transformer';
-import { validateSync } from 'class-validator';
+import { validateSync, ValidationError } from 'class-validator';
 
 export function validateEnvUtil<T>(config: Record<string, unknown>, envVariablesClass: ClassConstructor<T>): T {
   const validatedConfig = plainToInstance(envVariablesClass, config, {
@@ -16,4 +16,24 @@ export function validateEnvUtil<T>(config: Record<string, unknown>, envVariables
   }
 
   return validatedConfig;
+}
+export function formatErrorPipeUtil(errors: ValidationError[]) {
+  return errors
+    .map((error) => ({
+      field: error.property,
+      message: getMessage(error),
+    }))
+    .filter((error) => error.message);
+
+  function getMessage(error: ValidationError): string {
+    if (error.constraints) {
+      return Object.values(error.constraints)[0];
+    }
+
+    if (error.children && error.children.length) {
+      return error.children.map((child) => getMessage(child)).join(', ');
+    }
+
+    return 'Validation failed';
+  }
 }

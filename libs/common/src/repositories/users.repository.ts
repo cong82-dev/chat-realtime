@@ -15,11 +15,15 @@ export class UserRepository extends BaseRepository<UserEntity> {
     super(userRepository);
   }
 
-  public findUserByEmail(email: string): Promise<UserEntity | null> {
+  async findUserByEmail(email: string): Promise<UserEntity | null> {
     return this.userRepository.findOneBy({ email });
   }
 
-  public getAllUsers(payload: IPagination): Promise<IPaginationResult<UserEntity>> {
+  async getAllUsers(payload: IPagination): Promise<IPaginationResult<UserEntity>> {
     return this.paginate(payload, { select: { id: true, email: true } });
+  }
+
+  async updateUserRefreshToken(id: string, hashedRt: string): Promise<void> {
+    await this.userRepository.update({ id }, { hashedRt });
   }
 }

@@ -1,9 +1,9 @@
-import { ERROR_MESSAGE } from '@app/common/constants/error.message';
+import { ERROR_MESSAGE } from '@app/common/constants/message-api';
 import { LoginDto } from '@app/common/dto/auth.dto';
 import { IToken } from '@app/common/interfaces/token.interface';
 import { IUser } from '@app/common/interfaces/user.interface';
 import { BcryptService } from '@app/common/utils/bcrypt.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
@@ -21,7 +21,7 @@ export class AuthService {
     const user = await this.usersService.findUserByEmail(email);
 
     if (!user) {
-      throw new BadRequestException(ERROR_MESSAGE.AUTH.EMAIL_NOT_FOUND);
+      throw new ConflictException('Email not found');
     }
 
     await this.verifyPlainContentWithHashedContent(password, user.password);
@@ -29,20 +29,32 @@ export class AuthService {
     return user;
   }
 
-  async generateAccessToken(user: IUser): Promise<string> {
-    const payload = { sub: user.id, email: user.email };
-    return this.jwtService.signAsync(payload, {
-      secret: this.configService.get('app.jwtAccessTokenSecret'),
-      expiresIn: `${this.configService.get('app.jwtAccessTokenExpiresIn')}m`,
-    });
+  async validateRefreshToken(user: IUser, refreshToken: string): Promise<boolean> {
+    if (!user.hashedRt) {
+      return false;
+    }
+
+    const isMatching = await this.bcryptService.compareHash(refreshToken, user.hashedRt);
+
+    return isMatching;
   }
 
-  async generateRefreshToken(user: IUser): Promise<string> {
+  async generateTokens(user: IUser): Promise<IToken> {
     const payload = { sub: user.id, email: user.email };
-    return this.jwtService.signAsync(payload, {
-      secret: this.configService.get('app.jwtRefreshTokenSecret'),
-      expiresIn: `${this.configService.get('app.jwtRefreshTokenExpiresIn')}d`,
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get('app.jwtAccessTokenSecret'),
+        expiresIn: `${this.configService.get('app.jwtAccessTokenExpiresIn')}m`,
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get('app.jwtRefreshTokenSecret'),
+        expiresIn: `${this.configService.get('app.jwtRefreshTokenExpiresIn')}d`,
+      }),
+    ]).catch((error: Error) => {
+      throw new BadRequestException(error.message.split('\n').pop());
     });
+
+    return { accessToken, refreshToken };
   }
 
   private async verifyPlainContentWithHashedContent(plain_text: string, hashed_text: string): Promise<void> {
@@ -52,18 +64,18 @@ export class AuthService {
     }
   }
 
-  async login(user: IUser): Promise<IToken> {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.generateAccessToken(user),
-      this.generateRefreshToken(user),
-    ]).catch((error: Error) => {
-      throw new BadRequestException(error.message.split('\n').pop());
-    });
-
-    return { refreshToken, accessToken };
+  private async updateRefreshToken(userId: string, hashedRt: string): Promise<void> {
+    const hashRefreshToken = await this.bcryptService.hashValue(hashedRt);
+    await this.usersService.updateUserRefreshToken(userId, hashRefreshToken);
   }
 
-  async register(payload: LoginDto): Promise<Partial<IUser> & IToken> {
+  async login(user: IUser): Promise<IToken & { user: Partial<IUser> }> {
+    const { accessToken, refreshToken } = await this.generateTokens(user);
+    await this.updateRefreshToken(user.id, refreshToken);
+    return { refreshToken, accessToken, user: { id: user.id } };
+  }
+
+  async register(payload: LoginDto): Promise<IToken & { user: Partial<IUser> }> {
     const { email, password } = payload;
 
     const existingUser = await this.usersService.findUserByEmail(email);
@@ -74,14 +86,12 @@ export class AuthService {
     const hashedPassword = await this.bcryptService.hashValue(password);
 
     const newUser = await this.usersService.createUser({ email, password: hashedPassword });
-    const [accessToken, refreshToken] = await Promise.all([
-      this.generateAccessToken(newUser),
-      this.generateRefreshToken(newUser),
-    ]);
+
+    const { accessToken, refreshToken } = await this.generateTokens(newUser);
+    await this.updateRefreshToken(newUser.id, refreshToken);
 
     return {
-      id: newUser.id,
-      email: newUser.email,
+      user: { id: newUser.id },
       accessToken,
       refreshToken,
     };
@@ -90,12 +100,18 @@ export class AuthService {
   async getProfile(userId: string): Promise<Partial<IUser>> {
     const user = await this.usersService.findUserById(userId);
     if (!user) {
-      throw new BadRequestException(ERROR_MESSAGE.AUTH.USER_NOT_FOUND);
+      throw new BadRequestException(ERROR_MESSAGE.AUTH.ACCOUNT_NOT_FOUND);
     }
     return {
       id: user.id,
       email: user.email,
       avatarUrl: user.avatarUrl,
     };
+  }
+
+  async refreshToken(user: IUser): Promise<IToken & { user: Partial<IUser> }> {
+    const { accessToken, refreshToken } = await this.generateTokens(user);
+    await this.updateRefreshToken(user.id, refreshToken);
+    return { accessToken, refreshToken, user: { id: user.id } };
   }
 }

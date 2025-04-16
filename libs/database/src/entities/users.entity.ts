@@ -20,6 +20,9 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
 
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'hashed_rt' })
+  hashedRt: string;
+
   @OneToMany(() => FriendshipEntity, (friendship) => friendship.initiator)
   friendRequestsCreators: FriendshipEntity[];
 

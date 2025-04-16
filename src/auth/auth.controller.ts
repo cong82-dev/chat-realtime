@@ -5,6 +5,7 @@ import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { LoginDto, RegisterDto } from '@app/common/dto/auth.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Public } from '@app/common/decorators/public.decorator';
+import { JwtRefreshTokenGuard } from './guards/jwt-refresh-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,5 +30,14 @@ export class AuthController {
   @ApiBearerAuth()
   getProfile(@Req() { user }: IRequest) {
     return this.authService.getProfile(user.id);
+  }
+
+  @Public()
+  @ApiBearerAuth()
+  @Post('refresh-token')
+  @UseGuards(JwtRefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Req() { user }: IRequest) {
+    return this.authService.refreshToken(user);
   }
 }

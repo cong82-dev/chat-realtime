@@ -6,4 +6,5 @@ export interface IUser {
   password: string;
   avatarUrl?: string;
   status: UserStatus;
+  hashedRt?: string;
 }

@@ -6,6 +6,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { UntilModule } from '@app/common/utils/until.module';
 import { UsersModule } from 'src/users/users.module';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 const modules = [
   ConfigModule,
@@ -19,7 +20,7 @@ const modules = [
   }),
   UntilModule,
 ];
-const providers = [AuthService, LocalStrategy];
+const providers = [AuthService, LocalStrategy, JwtRefreshStrategy];
 @Module({
   imports: [...modules],
   providers: [...providers],

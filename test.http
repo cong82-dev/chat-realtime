@@ -1,9 +1,30 @@
 @baseUrl = http://localhost:3000/api/v1
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjkyYTJkOC04M2E0LTQ4OTUtODhhZC1lNjZhOWUyMTE4YjQiLCJlbWFpbCI6ImRldkB5b3BtYWlsLmNvbSIsImlhdCI6MTc0NDk2Nzc1NywiZXhwIjoxNzQ0OTY4NjU3fQ.ylk-tpNHklMa3J2DKUNsNZ6tE56NVXskX-Ndy1K5PxI
+
+
+### login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "dev1@yopmail.com",
+  "password": "password12"
+}
+
+### get user profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{token}}
+
+
+
 
 ### Call API refresh-token
 POST {{baseUrl}}/auth/refresh-token
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZjkyYTJkOC04M2E0LTQ4OTUtODhhZC1lNjZhOWUyMTE4YjQiLCJlbWFpbCI6ImRldkB5b3BtYWlsLmNvbSIsImlhdCI6MTc0NDY5OTQ4NiwiZXhwIjoxNzQ1MzA0Mjg2fQ.Hc9biUAEvcarVLqtJ5TKkM0p5sORbUih1ap6Z1lbCpE
+
+
+### Call API logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
 
 ### Get all users
 GET {{baseUrl}}/users

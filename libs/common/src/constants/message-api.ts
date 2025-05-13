@@ -6,6 +6,9 @@ export const ERROR_MESSAGE = Object.freeze({
     ACCOUNT_NOT_FOUND: 'Account not found',
     TOKEN_GENERATION_FAILED: 'Token generation failed',
     INVALID_REFRESH_TOKEN: 'Invalid refresh token',
+    INVALID_ACCESS_TOKEN: 'Invalid access token',
+    TOKEN_NOT_FOUND: 'Token not found',
+    LOGOUT_FAILED: 'Logout failed',
   },
   FRIENDSHIPS: {
     FRIEND_REQUEST_EXISTS: 'Friend request already exists.',
@@ -13,6 +16,9 @@ export const ERROR_MESSAGE = Object.freeze({
     FRIEND_REQUEST_ALREADY_ACCEPTED: 'Friend request already accepted.',
     FRIEND_REQUEST_FAILED: 'Friend request creation failed.',
     INVALID_ACTION: 'Invalid action. Please use "accept" or "reject".',
+  },
+  USER: {
+    USER_NOT_FOUND: 'User not found',
   },
 });
 

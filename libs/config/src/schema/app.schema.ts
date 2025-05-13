@@ -8,4 +8,20 @@ export class AppSchemaConfig {
   @IsString()
   @IsNotEmpty()
   APP_NODE_ENV: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_SECRET: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_ACCESS_TOKEN_EXPIRES_IN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_REFRESH_TOKEN_EXPIRES_IN: string;
+
+  @IsString()
+  @IsNotEmpty()
+  JWT_REFRESH_TOKEN_SECRET: string;
 }

@@ -7,7 +7,7 @@ import { Response } from 'express';
 export interface ResponseData<T> {
   statusCode: number;
   message: string;
-  data: T;
+  data?: T;
 }
 
 @Injectable()
@@ -20,6 +20,13 @@ export class TransformInterceptor<T = any> implements NestInterceptor<unknown, R
       map((data: T) => {
         const statusCode = response.statusCode || 200;
         const message = getMessage(statusCode) || 'SUCCESS';
+        if (typeof data === 'string') {
+          return {
+            statusCode,
+            message: data,
+          };
+        }
+
         return {
           statusCode,
           message,

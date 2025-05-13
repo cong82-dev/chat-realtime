@@ -11,6 +11,7 @@ import { FriendshipsModule } from './friendships/friendships.module';
 import { LoggerModule } from '@app/common/logger/logger.module';
 import { AllExceptionsFilter } from '@app/common/filters/bad-request.filter';
 import { LoggerService } from '@app/common/logger/logger.service';
+import { ConversationsModule } from './conversations/conversations.module';
 
 const modules = [AppConfigModule, DatabaseModule, AuthModule, UsersModule, LoggerModule];
 const providers = [
@@ -21,7 +22,7 @@ const providers = [
   { provide: APP_FILTER, useClass: AllExceptionsFilter },
 ];
 @Module({
-  imports: [...modules, FriendshipsModule],
+  imports: [...modules, FriendshipsModule, ConversationsModule],
   providers: [...providers],
 })
 export class AppModule {}

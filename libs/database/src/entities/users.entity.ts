@@ -21,7 +21,7 @@ export class UserEntity extends BaseEntity {
   status: UserStatus;
 
   @Column({ type: 'varchar', length: 255, nullable: true, name: 'hashed_rt' })
-  hashedRt: string;
+  hashedRt: string | null;
 
   @OneToMany(() => FriendshipEntity, (friendship) => friendship.initiator)
   friendRequestsCreators: FriendshipEntity[];

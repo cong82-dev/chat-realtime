@@ -3,11 +3,12 @@ import { BaseRepository } from './base/base.abstract.repository';
 import { UserEntity } from '@app/database/entities/users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IPagination, IPaginationResult } from '../interfaces';
+import { UserQueryDto } from '../dto/users/user-query.dto';
+import { IPaginationResult } from '../interfaces';
+import { getPaginationParams } from '../helper/pagination.helper';
 
 @Injectable()
 export class UserRepository extends BaseRepository<UserEntity> {
-  createUser: any;
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -19,11 +20,41 @@ export class UserRepository extends BaseRepository<UserEntity> {
     return this.userRepository.findOneBy({ email });
   }
 
-  async getAllUsers(payload: IPagination): Promise<IPaginationResult<UserEntity>> {
-    return this.paginate(payload, { select: { id: true, email: true } });
+  async userDetail(id: string): Promise<UserEntity | null> {
+    const userData = this.userRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+    return userData;
   }
 
-  async updateUserRefreshToken(id: string, hashedRt: string): Promise<void> {
+  async updateUserRefreshToken(id: string, hashedRt: string | null): Promise<void> {
     await this.userRepository.update({ id }, { hashedRt });
+  }
+
+  async filterUsers(payload: UserQueryDto): Promise<IPaginationResult<UserEntity>> {
+    const { skip, take, page } = getPaginationParams(payload.page, payload.take);
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    if (payload.email) {
+      queryBuilder.andWhere('user.email LIKE :email', { email: `%${payload.email}%` });
+    }
+
+    queryBuilder.skip(skip).take(take);
+    queryBuilder.orderBy('user.createdAt', payload.orderBy);
+    queryBuilder.select(['user.id', 'user.email']);
+    const [items, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      items,
+      meta: {
+        total,
+        page: page,
+        take,
+      },
+    };
   }
 }

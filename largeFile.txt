@@ -1,0 +1,4 @@
+Đây là tệp ví dụ với nội dung giả lập cho Node.js.
+Nội dung này sẽ giúp bạn hiểu cách xử lý tệp với streams và buffers.
+Cứ thế này mà thực hành với các hàm fs và streams trong Node.js!
+Chúc bạn học tốt!

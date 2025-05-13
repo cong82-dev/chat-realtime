@@ -36,7 +36,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const { status, message, errors } = result;
 
     this.logger.error(
-      `[${request.method}] [${status}] ${request.url} - ${JSON.stringify(message)}`,
+      `[${request.method}] [${status}] ${request.url}
+→ Body: ${JSON.stringify(request.body)}
+→ Message: ${JSON.stringify(message)}
+→ Errors: ${JSON.stringify(errors)}`,
       exception instanceof Error ? exception.stack : undefined,
       AllExceptionsFilter.name,
     );

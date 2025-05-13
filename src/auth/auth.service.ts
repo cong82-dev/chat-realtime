@@ -1,4 +1,4 @@
-import { ERROR_MESSAGE } from '@app/common/constants/message-api';
+import { ERROR_MESSAGE, SUCCESS_MESSAGE } from '@app/common/constants/message-api';
 import { LoginDto } from '@app/common/dto/auth.dto';
 import { IToken } from '@app/common/interfaces/token.interface';
 import { IUser } from '@app/common/interfaces/user.interface';
@@ -6,7 +6,9 @@ import { BcryptService } from '@app/common/utils/bcrypt.service';
 import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Response } from 'express';
 import { UsersService } from 'src/users/users.service';
+import { CookieService } from './cookie.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +17,7 @@ export class AuthService {
     private readonly bcryptService: BcryptService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly cookieService: CookieService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<IUser> {
@@ -43,12 +46,12 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get('app.jwtAccessTokenSecret'),
-        expiresIn: `${this.configService.get('app.jwtAccessTokenExpiresIn')}m`,
+        secret: this.configService.get<string>('app.jwtAccessTokenSecret'),
+        expiresIn: `${this.configService.get<string>('app.jwtAccessTokenExpiresIn')}`,
       }),
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get('app.jwtRefreshTokenSecret'),
-        expiresIn: `${this.configService.get('app.jwtRefreshTokenExpiresIn')}d`,
+        secret: this.configService.get<string>('app.jwtRefreshTokenSecret'),
+        expiresIn: `${this.configService.get<string>('app.jwtRefreshTokenExpiresIn')}`,
       }),
     ]).catch((error: Error) => {
       throw new BadRequestException(error.message.split('\n').pop());
@@ -69,9 +72,11 @@ export class AuthService {
     await this.usersService.updateUserRefreshToken(userId, hashRefreshToken);
   }
 
-  async login(user: IUser): Promise<IToken & { user: Partial<IUser> }> {
+  async login(user: IUser, res: Response): Promise<IToken & { user: Partial<IUser> }> {
     const { accessToken, refreshToken } = await this.generateTokens(user);
     await this.updateRefreshToken(user.id, refreshToken);
+    this.cookieService.setCookieRefreshToken(refreshToken, res);
+
     return { refreshToken, accessToken, user: { id: user.id } };
   }
 
@@ -99,6 +104,7 @@ export class AuthService {
 
   async getProfile(userId: string): Promise<Partial<IUser>> {
     const user = await this.usersService.findUserById(userId);
+
     if (!user) {
       throw new BadRequestException(ERROR_MESSAGE.AUTH.ACCOUNT_NOT_FOUND);
     }
@@ -107,6 +113,16 @@ export class AuthService {
       email: user.email,
       avatarUrl: user.avatarUrl,
     };
+  }
+
+  async logout(user: IUser, res: Response): Promise<string> {
+    await Promise.all([
+      this.usersService.updateUserRefreshToken(user.id, null),
+      this.cookieService.deleteCookieRefreshToken(res),
+    ]).catch(() => {
+      throw new BadRequestException(SUCCESS_MESSAGE.AUTH.LOGOUT_SUCCESS);
+    });
+    return SUCCESS_MESSAGE.AUTH.LOGOUT_SUCCESS;
   }
 
   async refreshToken(user: IUser): Promise<IToken & { user: Partial<IUser> }> {

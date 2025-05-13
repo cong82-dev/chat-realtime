@@ -24,5 +24,4 @@ export async function friendshipSeeder(dataSource: DataSource) {
   const friendships = otherUsers.map((user) => createFakeFriendship(devUser.id, user.id));
 
   await friendshipRepository.save(friendships);
-  console.log(`Inserted ${friendships.length} friendships`);
 }

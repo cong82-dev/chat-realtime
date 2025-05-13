@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UntilModule } from '@app/common/utils/until.module';
 import { UsersModule } from 'src/users/users.module';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { CookieService } from './cookie.service';
 
 const modules = [
   ConfigModule,
@@ -20,7 +21,7 @@ const modules = [
   }),
   UntilModule,
 ];
-const providers = [AuthService, LocalStrategy, JwtRefreshStrategy];
+const providers = [AuthService, LocalStrategy, JwtRefreshStrategy, CookieService];
 @Module({
   imports: [...modules],
   providers: [...providers],
